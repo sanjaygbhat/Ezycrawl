@@ -8,6 +8,7 @@ const openai = new OpenAI({
 });
 
 async function Gptresponse(data, labels = []){
+    console.log(labels);
     const completion = await openai.chat.completions.create({
         messages: [
             { role: "system", content: `Read the info provided, give me ${labels.join(', ')} and respond in JSON format` },
@@ -33,7 +34,6 @@ router.post('/process', async (req, res) => {
         const fullUrl = `${config.jinaReaderApiUrl}${url}`;
         const jinaResponse = await axios.get(fullUrl);
         const data = jinaResponse.data;
-        console.log(data);
 
         const gptResponse = await Gptresponse(data, safeLabels); // Pass safeLabels to Gptresponse
         // Check if gptResponse is undefined or contains an error field
@@ -44,9 +44,6 @@ router.post('/process', async (req, res) => {
             console.error('GPT API responded with error:', errorStatus, errorMessage);
             return res.status(errorStatus).json({ error: errorMessage });
         }
-
-        console.log('Response from GPT API:', gptResponse); // Log to see the response from the GPT API
-        console.log('GPT Response Choice Message:', gptResponse.choices[0].message);
         return res.json(JSON.parse(gptResponse.choices[0].message.content));
     } catch (error) {
         console.error('Error in /process route:', error);

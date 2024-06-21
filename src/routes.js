@@ -1,8 +1,24 @@
 const express = require('express');
 const axios = require('axios');
 const config = require('./config');
-
+const OpenAI = require('openai');
 const router = express.Router();
+const openai = new OpenAI({
+    apiKey: config.gpt4oKey
+});
+
+async function Gptresponse(data){
+    const completion = await openai.chat.completions.create({
+        messages: [
+            { role: "system", content: "Read the info provided, and put attribute types as key and attribute value as values, and respond in JSON format" },
+            { role: "user", content: data }
+        ],
+        model: "gpt-4o",
+        response_format: { type: "json_object" },
+        temperature: 0.2
+      });
+    return completion;
+}
 
 router.post('/process', async (req, res) => {
     const { url } = req.body;
@@ -11,44 +27,25 @@ router.post('/process', async (req, res) => {
     }
 
     try {
-        // Fetch data from Jina Reader API
-        console.log(`Requesting data from Jina Reader API for URL: ${url}`);
-        const jinaResponse = await axios.post(config.jinaReaderApiUrl, { url });
+        const fullUrl = `${config.jinaReaderApiUrl}${url}`;
+        const jinaResponse = await axios.get(fullUrl);
         const data = jinaResponse.data;
+        console.log(data);
 
-        // Log the data received from Jina Reader API
-        console.log('Data received from Jina Reader API:', data);
-
-        // Use GPT-4 API to process the data
-        console.log('Sending data to GPT-4 API...');
-        const gptResponse = await axios.post('https://api.openai.com/v1/gpt4o', data, {
-            headers: {
-                'Authorization': `Bearer ${config.gpt4oKey}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        // Log the response from GPT-4 API
-        console.log('Response from GPT-4 API:', gptResponse.data);
-
-        return res.json(gptResponse.data);
-    } catch (error) {
-        console.error('Error occurred:', error);
-        
-        // Log specific error details
-        if (error.response) {
-            // The request was made and the server responded with a status code that falls out of the range of 2xx
-            console.error('Error response data:', error.response.data);
-            console.error('Error response status:', error.response.status);
-            console.error('Error response headers:', error.response.headers);
-        } else if (error.request) {
-            // The request was made but no response was received
-            console.error('Error request data:', error.request);
-        } else {
-            // Something happened in setting up the request that triggered an Error
-            console.error('Error message:', error.message);
+        const gptResponse = await Gptresponse(data);
+        // Check if gptResponse is undefined or contains an error field
+        if (!gptResponse || gptResponse.error) {
+            const errorStatus = gptResponse ? gptResponse.status : 500; // Use 500 as a fallback status code
+            const errorMessage = gptResponse ? gptResponse.error : 'GPT API Error';
+            console.error('GPT API responded with error:', errorStatus, errorMessage);
+            return res.status(errorStatus).json({ error: errorMessage });
         }
-        
+
+        console.log('Response from GPT API:', gptResponse); // Log to see the response from the GPT API
+        console.log('GPT Response Choice Message:', gptResponse.choices[0].message);
+        return res.json(JSON.parse(gptResponse.choices[0].message.content));
+    } catch (error) {
+        console.error('Error in /process route:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 });

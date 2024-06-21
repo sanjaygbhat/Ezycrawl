@@ -1,5 +1,5 @@
 // src/config.js
-require('dotenv').config();
+require('dotenv').config({ path: 'ezycrawl.env', debug: true })
 
 const config = {
     port: process.env.PORT || 3000,

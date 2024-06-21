@@ -7,24 +7,27 @@ const openai = new OpenAI({
     apiKey: config.gpt4oKey
 });
 
-async function Gptresponse(data){
+async function Gptresponse(data, labels = []){
     const completion = await openai.chat.completions.create({
         messages: [
-            { role: "system", content: "Read the info provided, and put attribute types as key and attribute value as values, and respond in JSON format" },
+            { role: "system", content: `Read the info provided, give me ${labels.join(', ')} and respond in JSON format` },
             { role: "user", content: data }
         ],
         model: "gpt-4o",
         response_format: { type: "json_object" },
-        temperature: 0.2
+        temperature: 0
       });
     return completion;
 }
 
 router.post('/process', async (req, res) => {
-    const { url } = req.body;
+    const { url, labels } = req.body; // Extract labels along with the url from the request body
     if (!url) {
         return res.status(400).json({ error: 'URL is required' });
     }
+
+    // Ensure labels is always an array, even if not provided or not in array format
+    const safeLabels = Array.isArray(labels) ? labels : [];
 
     try {
         const fullUrl = `${config.jinaReaderApiUrl}${url}`;
@@ -32,9 +35,10 @@ router.post('/process', async (req, res) => {
         const data = jinaResponse.data;
         console.log(data);
 
-        const gptResponse = await Gptresponse(data);
+        const gptResponse = await Gptresponse(data, safeLabels); // Pass safeLabels to Gptresponse
         // Check if gptResponse is undefined or contains an error field
         if (!gptResponse || gptResponse.error) {
+            // Log the entire gptResponse object in a pretty format for better readability
             const errorStatus = gptResponse ? gptResponse.status : 500; // Use 500 as a fallback status code
             const errorMessage = gptResponse ? gptResponse.error : 'GPT API Error';
             console.error('GPT API responded with error:', errorStatus, errorMessage);

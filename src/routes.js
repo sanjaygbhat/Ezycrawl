@@ -11,7 +11,7 @@ async function Gptresponse(data, labels = []){
     console.log(labels);
     const completion = await openai.chat.completions.create({
         messages: [
-            { role: "system", content: `Read the info provided, give me ${labels.join(', ')} and respond in JSON format` },
+            { role: "system", content: `Read the info provided, only give me data that have ${labels.join(', ')} as their attribute , store multiple values if needed and respond in JSON format` },
             { role: "user", content: data }
         ],
         model: "gpt-4o",
@@ -22,24 +22,26 @@ async function Gptresponse(data, labels = []){
 }
 
 router.post('/process', async (req, res) => {
-    const { url, labels } = req.body; // Extract labels along with the url from the request body
+    const { url, labels } = req.body;
     if (!url) {
         return res.status(400).json({ error: 'URL is required' });
     }
 
-    // Ensure labels is always an array, even if not provided or not in array format
     const safeLabels = Array.isArray(labels) ? labels : [];
 
     try {
-        const fullUrl = `${config.jinaReaderApiUrl}${url}`;
-        const jinaResponse = await axios.get(fullUrl);
+        const fullUrl = `https://r.jina.ai/${url}`;
+        const jinaResponse = await axios.get(fullUrl, {
+            headers: {
+                "X-Return-Format": "text"
+            }
+        });
         const data = jinaResponse.data;
+        console.log(data);
 
-        const gptResponse = await Gptresponse(data, safeLabels); // Pass safeLabels to Gptresponse
-        // Check if gptResponse is undefined or contains an error field
+        const gptResponse = await Gptresponse(data, safeLabels);
         if (!gptResponse || gptResponse.error) {
-            // Log the entire gptResponse object in a pretty format for better readability
-            const errorStatus = gptResponse ? gptResponse.status : 500; // Use 500 as a fallback status code
+            const errorStatus = gptResponse ? gptResponse.status : 500;
             const errorMessage = gptResponse ? gptResponse.error : 'GPT API Error';
             console.error('GPT API responded with error:', errorStatus, errorMessage);
             return res.status(errorStatus).json({ error: errorMessage });

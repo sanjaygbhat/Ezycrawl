@@ -1,6 +1,6 @@
 const express = require('express');
 const axios = require('axios');
-const config = require('./config');
+const config = require('../src/config');
 const OpenAI = require('openai');
 const router = express.Router();
 const openai = new OpenAI({
@@ -54,3 +54,5 @@ router.post('/process', async (req, res) => {
 });
 
 module.exports = router;
+
+

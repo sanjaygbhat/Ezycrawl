@@ -1,5 +1,3 @@
-console.log('APP.JS IS RUNNING - VERSION 1');
-
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -7,35 +5,33 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const { Pool } = require('pg');
 const crypto = require('crypto');
-
+const axios = require('axios');
+const cheerio = require('cheerio');
+const routes = require('../routes/routes');
 const app = express();
 const pool = new Pool(/* your database configuration */);
-
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(session({
     secret: 'your_secret_key',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false } // for HTTP; set true for HTTPS
 }));
-
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use('/', routes);
 app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
-
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
-
 app.get('/dashboard', (req, res) => {
     if (!req.session.userId) {
         return res.redirect('/login.html');
     }
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
-
 app.post('/signup', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -47,7 +43,6 @@ app.post('/signup', async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
-
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -65,11 +60,8 @@ app.post('/login', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 app.get('/api/user-info', async (req, res) => {
-    console.log('Request received for /api/user-info');
     if (!req.session.userId) {
-        console.log('No user session found');
         return res.status(401).json({ error: 'Not authenticated' });
     }
     try {
@@ -80,11 +72,8 @@ app.get('/api/user-info', async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
-
 app.get('/api/api-keys', async (req, res) => {
-    console.log('Request received for /api/api-keys');
     if (!req.session.userId) {
-        console.log('No user session found');
         return res.status(401).json({ error: 'Not authenticated' });
     }
     try {
@@ -95,16 +84,12 @@ app.get('/api/api-keys', async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
-
 app.post('/api/create-api-key', async (req, res) => {
-    console.log('Request received for /api/create-api-key');
     if (!req.session.userId) {
-        console.log('No user session found');
         return res.status(401).json({ error: 'Not authenticated' });
     }
     try {
         const apiKey = crypto.randomBytes(32).toString('hex');
-        console.log('Generated API key:', apiKey);
         await pool.query('INSERT INTO api_keys (user_id, key) VALUES ($1, $2)', [req.session.userId, apiKey]);
         res.json({ apiKey });
     } catch (error) {
@@ -112,13 +97,8 @@ app.post('/api/create-api-key', async (req, res) => {
         res.status(500).json({ error: 'Server error' });
     }
 });
-
-// Move this catch-all route to the end of all other routes
-app.use((req, res) => {
-    console.error(`Unhandled request to ${req.path}`);
-    res.status(404).send('404 Not Found');
+// Add this catch-all middleware at the end of your routes
+app.use((req, res, next) => {
+    next();
 });
-
-app.listen(3000, () => {
-    console.log(`Server running on http://localhost:3000`);
-});
+module.exports = app;

@@ -1,17 +1,15 @@
-<!-- src/public/login.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
 </head>
 <body>
-    <form action="/login" method="post">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
+    <h1>Login</h1>
+    <form id="loginForm">
+        <input type="email" id="email" required>
+        <input type="password" id="password" required>
         <button type="submit">Login</button>
     </form>
-    <button onclick="window.location.href='index.html'">Back</button>
+    <script src="./login.js"></script>
 </body>
 </html>

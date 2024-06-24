@@ -13,34 +13,29 @@
         <header>
             <nav>
                 <div class="logo">EzyCrawl</div>
-                <div id="authButtons">
-                    <button onclick="showLoginForm()" class="auth-btn">Login</button>
-                    <button onclick="showSignupForm()" class="auth-btn">Sign Up</button>
-                </div>
             </nav>
         </header>
         <main>
-            <div id="error" class="error-message" style="display: none;"></div>
-            <div class="auth-form" id="loginForm" style="display: none;">
-                <h2>Login</h2>
-                <input type="email" id="loginEmail" placeholder="Email" required>
-                <input type="password" id="loginPassword" placeholder="Password" required>
-                <button onclick="login()">Login</button>
-            </div>
-            <div class="auth-form" id="signupForm" style="display: none;">
-                <h2>Sign Up</h2>
-                <input type="email" id="signupEmail" placeholder="Email" required>
-                <input type="password" id="signupPassword" placeholder="Password" required>
-                <button onclick="signup()">Sign Up</button>
-            </div>
-            <div class="container">
-                <h1>URL Processor</h1>
-                <input type="text" id="urlInput" placeholder="Enter URL here">
-                <button onclick="processUrl()">Process URL</button>
-                <div id="apiResponse"></div>
-                <h2>Attributes</h2>
-                <input type="text" id="wordInput" placeholder="Enter a word" onkeydown="handleWordInput(event)">
-                <div id="wordsDisplay"></div>
+            <div class="content-container">
+                <div class="auth-container">
+                    <div id="error" class="error-message" style="display: none;"></div>
+                    <div class="auth-form">
+                        <h2>Login / Sign Up</h2>
+                        <input type="email" id="authEmail" placeholder="Email" required>
+                        <input type="password" id="authPassword" placeholder="Password" required>
+                        <button onclick="login()" class="auth-btn">Login</button>
+                        <button onclick="signup()" class="auth-btn">Sign Up</button>
+                    </div>
+                </div>
+                <div class="url-processor-container">
+                    <h1>URL Processor</h1>
+                    <input type="text" id="urlInput" placeholder="Enter URL here">
+                    <button onclick="processUrl()">Process URL</button>
+                    <div id="apiResponse"></div>
+                    <h2>Attributes</h2>
+                    <input type="text" id="wordInput" placeholder="Enter a word" onkeydown="handleWordInput(event)">
+                    <div id="wordsDisplay"></div>
+                </div>
             </div>
         </main>
         <footer>

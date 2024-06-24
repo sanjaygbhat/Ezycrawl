@@ -56,16 +56,6 @@ function getRandomColor() {
     return color;
 }
 
-function showLoginForm() {
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('signupForm').style.display = 'none';
-}
-
-function showSignupForm() {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('signupForm').style.display = 'block';
-}
-
 function displayError(message) {
     const errorDiv = document.getElementById('error');
     errorDiv.innerText = message;
@@ -89,8 +79,8 @@ function validatePassword(password) {
 
 function login() {
     clearError();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
 
     if (!validateEmail(email)) {
         displayError('Invalid email format');
@@ -125,8 +115,8 @@ function login() {
 
 function signup() {
     clearError();
-    const email = document.getElementById('signupEmail').value;
-    const password = document.getElementById('signupPassword').value;
+    const email = document.getElementById('authEmail').value;
+    const password = document.getElementById('authPassword').value;
 
     if (!validateEmail(email)) {
         displayError('Invalid email format');

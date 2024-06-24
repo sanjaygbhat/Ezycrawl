@@ -3,21 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Interaction</title>
+    <title>EzyCrawl</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>URL Processor</h1>
-        <input type="text" id="urlInput" placeholder="Enter URL here">
-        <button onclick="processUrl()">Process URL</button>
-        <div id="apiResponse"></div>
-        <h2>Attributes</h2>
-        <input type="text" id="wordInput" placeholder="Enter a word" onkeydown="handleWordInput(event)">
-        <div id="wordsDisplay"></div>
+    <div class="page-container">
+        <header>
+            <nav>
+                <div class="logo">EzyCrawl</div>
+                <div id="authButtons">
+                    <button onclick="showLoginForm()" class="auth-btn">Login</button>
+                    <button onclick="showSignupForm()" class="auth-btn">Sign Up</button>
+                </div>
+            </nav>
+        </header>
+        <main>
+            <div id="error" class="error-message" style="display: none;"></div>
+            <div class="auth-form" id="loginForm" style="display: none;">
+                <h2>Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
+                <button onclick="login()">Login</button>
+            </div>
+            <div class="auth-form" id="signupForm" style="display: none;">
+                <h2>Sign Up</h2>
+                <input type="email" id="signupEmail" placeholder="Email" required>
+                <input type="password" id="signupPassword" placeholder="Password" required>
+                <button onclick="signup()">Sign Up</button>
+            </div>
+            <div class="container">
+                <h1>URL Processor</h1>
+                <input type="text" id="urlInput" placeholder="Enter URL here">
+                <button onclick="processUrl()">Process URL</button>
+                <div id="apiResponse"></div>
+                <h2>Attributes</h2>
+                <input type="text" id="wordInput" placeholder="Enter a word" onkeydown="handleWordInput(event)">
+                <div id="wordsDisplay"></div>
+            </div>
+        </main>
+        <footer>
+            <p>EzyCrawl</p>
+        </footer>
     </div>
     <script src="script.js"></script>
-    <button onclick="window.location.href='login.html'">Login</button>
-    <button onclick="window.location.href='sign.html'">Sign Up</button>
 </body>
 </html>

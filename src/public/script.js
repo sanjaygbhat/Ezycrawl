@@ -2,30 +2,29 @@ let labels = []; // Initialize an empty array to store labels
 
 function processUrl() {
     const url = document.getElementById('urlInput').value;
+    const apiKey = prompt("Please enter your API key:");
     if (!url) {
         alert('Please enter a URL');
         return;
     }
+    if (!apiKey) {
+        alert('Please enter an API key');
+        return;
+    }
 
-    // Sending a POST request to the '/api/process' endpoint
-    fetch('/api/process', {
+    fetch('/api/scrape', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ url, labels }) // Send labels along with the URL
+        body: JSON.stringify({ url, attributes: labels, apiKey })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.text();  // Handling the response as plain text
-    })
-    .then(text => {
-        document.getElementById('apiResponse').textContent = text;
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('apiResponse').textContent = JSON.stringify(data, null, 2);
     })
     .catch(error => {
-        document.getElementById('apiResponse').textContent = 'Failed to process URL';
+        document.getElementById('apiResponse').textContent = 'Failed to process URL: ' + error.message;
     });
 }
 
@@ -36,32 +35,18 @@ function handleWordInput(event) {
         const word = wordInput.value.trim();
 
         if (word) {
-            // Add the word to the labels array
             labels.push(word);
-            console.log(labels); // Log the labels array
-
-            // Create a span element for the word
             const wordSpan = document.createElement('span');
             wordSpan.textContent = word;
-            wordSpan.style.padding = '5px 10px';
-            wordSpan.style.margin = '5px';
-            wordSpan.style.borderRadius = '5px';
-            wordSpan.style.color = '#fff'; // White text color
-            wordSpan.style.backgroundColor = getRandomColor(); // Random background color
-
-            // Append the word span to the display area
+            wordSpan.style.backgroundColor = getRandomColor();
             wordsDisplay.appendChild(wordSpan);
-
-            // Clear the input for the next word
             wordInput.value = '';
         }
 
-        // Prevent default action of the enter key
         event.preventDefault();
     }
 }
 
-// Function to generate a random color
 function getRandomColor() {
     const letters = '0123456789ABCDEF';
     let color = '#';
@@ -69,4 +54,107 @@ function getRandomColor() {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
+}
+
+function showLoginForm() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+}
+
+function showSignupForm() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+}
+
+function displayError(message) {
+    const errorDiv = document.getElementById('error');
+    errorDiv.innerText = message;
+    errorDiv.style.display = 'block';
+}
+
+function clearError() {
+    const errorDiv = document.getElementById('error');
+    errorDiv.innerText = '';
+    errorDiv.style.display = 'none';
+}
+
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+}
+
+function validatePassword(password) {
+    return password.length >= 6;
+}
+
+function login() {
+    clearError();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    if (!validateEmail(email)) {
+        displayError('Invalid email format');
+        return;
+    }
+
+    if (!validatePassword(password)) {
+        displayError('Password must be at least 6 characters long');
+        return;
+    }
+
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/dashboard';
+        } else {
+            displayError('Login failed: ' + data.error);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        displayError('An unexpected error occurred');
+    });
+}
+
+function signup() {
+    clearError();
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+
+    if (!validateEmail(email)) {
+        displayError('Invalid email format');
+        return;
+    }
+
+    if (!validatePassword(password)) {
+        displayError('Password must be at least 6 characters long');
+        return;
+    }
+
+    fetch('/signup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/dashboard';
+        } else {
+            displayError('Signup failed: ' + data.error);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        displayError('An unexpected error occurred');
+    });
 }

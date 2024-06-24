@@ -9,6 +9,7 @@ function fetchUserInfo() {
         .then(data => {
             document.getElementById('userEmail').textContent = data.email;
             document.getElementById('userLogo').textContent = data.email[0].toUpperCase();
+            createApiUsageChart(); // Call this function after fetching user info
         })
         .catch(error => console.error('Error fetching user info:', error));
 }
@@ -37,3 +38,30 @@ function createApiKey() {
         })
         .catch(error => console.error('Error creating API key:', error));
 }
+
+function createApiUsageChart() {
+    const ctx = document.getElementById('apiUsageChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'API Calls',
+                data: [12, 19, 3, 5, 2, 3],
+                borderColor: '#3498db',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Call this function after fetching user info
+createApiUsageChart();

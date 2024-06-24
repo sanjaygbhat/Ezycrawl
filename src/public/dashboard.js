@@ -1,17 +1,48 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM fully loaded and parsed");
     fetchUserInfo();
+    console.log("fetchUserInfo called");
     fetchApiKeys();
 });
 
 function fetchUserInfo() {
-    fetch('/api/user-info')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('userEmail').textContent = data.email;
-            document.getElementById('userLogo').textContent = data.email[0].toUpperCase();
-            createApiUsageChart(); // Call this function after fetching user info
-        })
-        .catch(error => console.error('Error fetching user info:', error));
+    console.log('Fetching user info...');
+    fetch('/api/user-info', {
+        credentials: 'include'
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('User info received:', data);
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        const creditBalanceElement = document.getElementById('creditBalance');
+        if (creditBalanceElement) {
+            if (data.credit_balance !== undefined) {
+                creditBalanceElement.textContent = `Credit Balance: $${parseFloat(data.credit_balance).toFixed(2)}`;
+            } else {
+                creditBalanceElement.textContent = 'Credit Balance: Not available';
+            }
+        } else {
+            console.error('creditBalance element not found');
+        }
+
+        createApiUsageChart(); // Call this function after fetching user info
+    })
+    .catch(error => {
+        console.error('Error fetching user info:', error);
+        const creditBalanceElement = document.getElementById('creditBalance');
+        if (creditBalanceElement) {
+            creditBalanceElement.textContent = 'Error loading credit balance';
+        }
+    });
 }
 
 function fetchApiKeys() {
@@ -62,6 +93,3 @@ function createApiUsageChart() {
         }
     });
 }
-
-// Call this function after fetching user info
-createApiUsageChart();

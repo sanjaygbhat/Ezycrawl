@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EzyCrawl Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="admin-panel">
+        <h1>Admin Panel</h1>
+        <div class="login-container">
+            <input type="email" id="adminEmail" placeholder="Admin Email">
+            <input type="password" id="adminPassword" placeholder="Admin Password">
+            <button id="loginButton">Login</button>
+        </div>
+        <div id="errorMessage" style="color: red; display: none;"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded and parsed');
+            const loginButton = document.getElementById('loginButton');
+            console.log('Login button:', loginButton);
+            
+            loginButton.addEventListener('click', loginAdmin);
+        });
+
+        async function loginAdmin() {
+            console.log('loginAdmin function called');
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            console.log('Email:', email);
+            console.log('Password:', password);
+
+            try {
+                console.log('Sending POST request to /api/admin/login');
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (response.ok) {
+                    console.log('Login successful, redirecting to admin dashboard');
+                    window.location.href = '/admin_dashboard.html';
+                } else {
+                    console.error('Login failed:', data.error);
+                    errorMessage.textContent = data.error || 'Invalid email or password';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                errorMessage.textContent = 'An unexpected error occurred';
+                errorMessage.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
